@@ -32,4 +32,15 @@ export class UserService {
 
     return newUser.save();
   }
+  async createAdmin(email: string, password: string) {
+    const adminExists = await this.userModel.findOne({ email });
+    if (adminExists) {
+      throw new Error('Admin already exists');
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const admin = new this.userModel({ email, password: hashedPassword, role: 'admin' });
+    await admin.save();
+    return { message: 'Admin created successfully' };
+  }
 }
