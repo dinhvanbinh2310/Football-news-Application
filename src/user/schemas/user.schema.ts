@@ -5,6 +5,8 @@ export type UserDocument = HydratedDocument<User>;
 
 @Schema({ timestamps: true })
 export class User {
+  _id: string;  // Thêm dòng này
+  
   @Prop({ required: true, unique: true })
   email: string;
 
