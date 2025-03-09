@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/event_screen.dart';
+import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/screens/register_screen.dart';
 
 void main() {
     runApp(MaterialApp(
-    home: EventScreen(),
+    home: RegisterScreen(),
   ));
 }
 
