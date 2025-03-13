@@ -18,8 +18,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
     setState(() => isLoading = true);
     try {
       final response = await ApiService.register(
-        nameController.text,
         emailController.text,
+        nameController.text,
         passwordController.text,
       );
       print("Đăng ký thành công: $response");
@@ -50,7 +50,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/images/hinh-nen-cristiano-ronaldo-cho-dien-thoai_095920005.jpg"),
+                image: AssetImage(
+                  "assets/images/hinh-nen-cristiano-ronaldo-cho-dien-thoai_095920005.jpg",
+                ),
                 fit: BoxFit.cover,
               ),
             ),
@@ -104,38 +106,51 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   SizedBox(height: 15),
 
                   // Mật khẩu
-                  _buildTextField(passwordController, "Mật khẩu", Icons.lock, isPassword: true),
+                  _buildTextField(
+                    passwordController,
+                    "Mật khẩu",
+                    Icons.lock,
+                    isPassword: true,
+                  ),
                   SizedBox(height: 20),
 
                   // Button đăng ký
                   isLoading
                       ? CircularProgressIndicator(color: Colors.white)
                       : ElevatedButton(
-                    onPressed: _register,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      backgroundColor: Colors.greenAccent.shade700,
-                      elevation: 5,
-                    ),
-                    child: Text(
-                      "Đăng ký",
-                      style: GoogleFonts.roboto(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        onPressed: _register,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 50,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          backgroundColor: Colors.greenAccent.shade700,
+                          elevation: 5,
+                        ),
+                        child: Text(
+                          "Đăng ký",
+                          style: GoogleFonts.roboto(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
                   SizedBox(height: 10),
 
                   // Link quay lại đăng nhập
                   TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => LoginScreen()),
-                    ),
+                    onPressed:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => LoginScreen(),
+                          ),
+                        ),
                     child: Text(
                       "Đã có tài khoản? Đăng nhập ngay!",
                       style: TextStyle(color: Colors.white),
@@ -151,7 +166,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
   }
 
   // Widget input field
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isPassword = false}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    bool isPassword = false,
+  }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
