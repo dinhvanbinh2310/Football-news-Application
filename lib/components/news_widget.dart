@@ -1,14 +1,58 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 
-class NewsWidget extends StatelessWidget {
+class NewsWidget extends StatefulWidget {
+  @override
+  _NewsWidgetState createState() => _NewsWidgetState();
+}
+
+class _NewsWidgetState extends State<NewsWidget> {
+  final PageController _pageController = PageController();
+  int _currentIndex = 0;
+  late Timer _timer;
+
+  final List<Map<String, String>> newsList = [
+    {'imageUrl': 'assets/images/news1.jpg', 'title': 'Tin tức 1'},
+    {'imageUrl': 'assets/images/news2.jpg', 'title': 'Tin tức 2'},
+    {'imageUrl': 'assets/images/news3.jpg', 'title': 'Tin tức 3'},
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startAutoSlide();
+  }
+
+  void _startAutoSlide() {
+    _timer = Timer.periodic(Duration(seconds: 2), (timer) {
+      if (_currentIndex < newsList.length - 1) {
+        _currentIndex++;
+      } else {
+        _currentIndex = 0; // Quay lại ảnh đầu tiên khi hết danh sách
+      }
+      _pageController.animateToPage(
+        _currentIndex,
+        duration: Duration(milliseconds: 500),
+        curve: Curves.easeInOut,
+      );
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: EdgeInsets.all(16), // Khoảng cách padding
+    return SingleChildScrollView(
+      // Thêm SingleChildScrollView ở đây
+      padding: EdgeInsets.all(16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start, // Căn trái tiêu đề
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
-          // Tiêu đề "News & Community"
           Text(
             'News & Community',
             style: TextStyle(
@@ -19,25 +63,20 @@ class NewsWidget extends StatelessWidget {
               height: 1.5,
             ),
           ),
-          SizedBox(height: 10), // Khoảng cách giữa tiêu đề và danh sách tin tức
-          // Danh sách các bài tin tức
-          Row(
-            mainAxisAlignment:
-                MainAxisAlignment.spaceBetween, // Cách đều các item
-            children: [
-              _newsItem(
-                imageUrl: 'https://via.placeholder.com/100', // Ảnh giả
-                title: 'Tin tức 1',
-              ),
-              _newsItem(
-                imageUrl: 'https://via.placeholder.com/100',
-                title: 'Tin tức 2',
-              ),
-              _newsItem(
-                imageUrl: 'https://via.placeholder.com/100',
-                title: 'Tin tức 3',
-              ),
-            ],
+          SizedBox(height: 10),
+          // Slider hình ảnh
+          SizedBox(
+            height: 350, // Chiều cao slider
+            child: PageView.builder(
+              controller: _pageController,
+              itemCount: newsList.length,
+              itemBuilder: (context, index) {
+                return _newsItem(
+                  imageUrl: newsList[index]['imageUrl']!,
+                  title: newsList[index]['title']!,
+                );
+              },
+            ),
           ),
         ],
       ),
@@ -49,11 +88,11 @@ class NewsWidget extends StatelessWidget {
     return Column(
       children: [
         ClipRRect(
-          borderRadius: BorderRadius.circular(8), // Bo tròn ảnh
-          child: Image.network(
+          borderRadius: BorderRadius.circular(8),
+          child: Image.asset(
             imageUrl,
-            width: 100,
-            height: 100,
+            width: double.infinity,
+            height: 300,
             fit: BoxFit.cover,
           ),
         ),
