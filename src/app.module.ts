@@ -8,17 +8,19 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MatchModule } from './match/match.module';
 import { OrderModule } from './order/order.module';
+import { ChatModule } from './chat/chat.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,  // Giúp các module khác sử dụng được biến môi trường
     }),
-    MongooseModule.forRoot('mongodb://localhost:27017/football-ticketing'),
+    MongooseModule.forRoot(process.env.MONGODB_URI || 'mongodb://localhost:27017/football-ticketing'),
     TicketModule,
     UserModule,
     AuthModule,
     MatchModule,
     OrderModule,
+    ChatModule,
   ],
     providers: [AppService],
     controllers: [AppController],
