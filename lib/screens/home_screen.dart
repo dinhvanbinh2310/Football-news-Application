@@ -3,7 +3,6 @@ import 'package:flutter_application_1/components/navbar.dart';
 import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/components/news_widget.dart';
 import 'package:flutter_application_1/components/arrival_widget.dart';
-import 'package:flutter_application_1/screens/chat_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override

@@ -13,12 +13,14 @@ class ChatService {
         body: jsonEncode({'prompt': prompt}),
       );
 
-      if (response.statusCode == 200) {
+      print('🔹 Status Code: ${response.statusCode}');
+      print('🔹 Response Body: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = jsonDecode(response.body);
-        return data
-            .toString(); // Hoặc thay đổi tùy theo format trả về từ NestJS
+        return data['message']; // Đọc từ key "message"
       } else {
-        throw Exception('Failed to generate text');
+        return 'Server Error: ${response.statusCode}, ${response.body}';
       }
     } catch (e) {
       return 'Error: $e';
