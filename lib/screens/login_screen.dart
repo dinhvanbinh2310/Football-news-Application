@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/screens/register_screen.dart';
-import 'package:flutter_application_1/screens/add_ticket_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
@@ -21,12 +22,18 @@ class _LoginScreenState extends State<LoginScreen> {
         emailController.text,
         passwordController.text,
       );
-      print("Đăng nhập thành công: $response");
+      final prefs = await SharedPreferences.getInstance();
+      if (response.containsKey('access_token')) {
+        await prefs.setString('token', response['access_token']);
+      } else {
+        return;
+      }
       Navigator.pushReplacement(
         context,
-        MaterialPageRoute(builder: (context) => AddTicketScreen()),
+        MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (error) {
+      print("Lỗi đăng nhập: $error"); // Debug lỗi
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text("Đăng nhập thất bại! Vui lòng thử lại.")),
       );
@@ -44,7 +51,9 @@ class _LoginScreenState extends State<LoginScreen> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage("assets/images/hinh-nen-cristiano-ronaldo-cho-dien-thoai_095920005.jpg"),
+                image: AssetImage(
+                  "assets/images/hinh-nen-cristiano-ronaldo-cho-dien-thoai_095920005.jpg",
+                ),
                 fit: BoxFit.cover,
               ),
             ),
@@ -94,38 +103,51 @@ class _LoginScreenState extends State<LoginScreen> {
                   SizedBox(height: 15),
 
                   // Mật khẩu
-                  _buildTextField(passwordController, "Mật khẩu", Icons.lock, isPassword: true),
+                  _buildTextField(
+                    passwordController,
+                    "Mật khẩu",
+                    Icons.lock,
+                    isPassword: true,
+                  ),
                   SizedBox(height: 20),
 
                   // Button đăng nhập
                   isLoading
                       ? CircularProgressIndicator(color: Colors.white)
                       : ElevatedButton(
-                    onPressed: _login,
-                    style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16, horizontal: 50),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                      backgroundColor: Colors.greenAccent.shade700,
-                      elevation: 5,
-                    ),
-                    child: Text(
-                      "Đăng nhập",
-                      style: GoogleFonts.roboto(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        onPressed: _login,
+                        style: ElevatedButton.styleFrom(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 50,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          backgroundColor: Colors.greenAccent.shade700,
+                          elevation: 5,
+                        ),
+                        child: Text(
+                          "Đăng nhập",
+                          style: GoogleFonts.roboto(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                       ),
-                    ),
-                  ),
 
                   SizedBox(height: 10),
 
                   // Link đăng ký
                   TextButton(
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => RegisterScreen()),
-                    ),
+                    onPressed:
+                        () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => RegisterScreen(),
+                          ),
+                        ),
                     child: Text(
                       "Chưa có tài khoản? Đăng ký ngay!",
                       style: TextStyle(color: Colors.white),
@@ -141,7 +163,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   // Widget input field
-  Widget _buildTextField(TextEditingController controller, String label, IconData icon, {bool isPassword = false}) {
+  Widget _buildTextField(
+    TextEditingController controller,
+    String label,
+    IconData icon, {
+    bool isPassword = false,
+  }) {
     return TextField(
       controller: controller,
       obscureText: isPassword,
