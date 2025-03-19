@@ -18,6 +18,12 @@ export class User {
 
   @Prop({ default: 'user' })  // Có thể là 'user' hoặc 'admin'
   role: string;
+
+  @Prop()
+  resetCode?: string; // Mã xác nhận đặt lại mật khẩu
+
+  @Prop()
+  resetExpires?: Date; // Thời gian hết hạn của mã xác nhận
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
