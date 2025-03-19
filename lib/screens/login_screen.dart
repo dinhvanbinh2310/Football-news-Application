@@ -24,6 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
       );
       final prefs = await SharedPreferences.getInstance();
       if (response.containsKey('access_token')) {
+        final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', response['access_token']);
       } else {
         return;
