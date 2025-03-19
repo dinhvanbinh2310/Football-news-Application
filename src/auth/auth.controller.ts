@@ -1,10 +1,17 @@
 import { BadRequestException, Body, Controller, Post, Req, Request, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { AuthGuard } from '@nestjs/passport';
+import * as bcrypt from 'bcryptjs';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { User } from '../user/schemas/user.schema';
+
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(private readonly authService: AuthService,
+    @InjectModel(User.name) private readonly userModel: Model<User>, 
+  ) {}
 
   @Post('register')
   async register(@Body() body: { email: string; password: string }) {
@@ -26,4 +33,31 @@ export class AuthController {
 
     return await this.authService.updatePassword(userId, oldPassword, newPassword);
   }
+
+  @Post('forgot-password')
+  async sendResetPasswordEmail(@Body() body: { email: string }) {
+    return this.authService.sendResetPasswordEmail(body.email);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() body) {
+    const { email, resetCode, newPassword } = body;
+
+    // Tìm user theo email và mã xác thực
+    const user = await this.userModel.findOne({ email, resetCode });
+
+    if (!user || !user.resetExpires || new Date(user.resetExpires).getTime() < Date.now()) {
+      throw new BadRequestException('Mã xác thực không hợp lệ hoặc đã hết hạn');
+    }
+
+    // Cập nhật mật khẩu mới
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.resetCode = undefined;
+    user.resetExpires = undefined;
+    await user.save();
+
+    return { message: 'Mật khẩu đã được đặt lại thành công' };
+  }
+
+  
 }
