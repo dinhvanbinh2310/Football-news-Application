@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_application_1/screens/forgot_password_screen.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
@@ -151,6 +152,19 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                     child: Text(
                       "Chưa có tài khoản? Đăng ký ngay!",
+                      style: TextStyle(color: Colors.white),
+                    ),
+                  ),
+                  TextButton(
+                    onPressed:
+                        () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForgotPasswordScreen(),
+                      ),
+                    ),
+                    child: Text(
+                      "Quên mật khẩu",
                       style: TextStyle(color: Colors.white),
                     ),
                   ),
