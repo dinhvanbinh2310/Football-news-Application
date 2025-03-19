@@ -12,9 +12,9 @@ class _NewsWidgetState extends State<NewsWidget> {
   late Timer _timer;
 
   final List<Map<String, String>> newsList = [
-    {'imageUrl': 'assets/images/news1.jpg', 'title': 'Tin tức 1'},
+    {'imageUrl': 'assets/images/news3.jpg', 'title': 'Tin tức 1'},
     {'imageUrl': 'assets/images/news2.jpg', 'title': 'Tin tức 2'},
-    {'imageUrl': 'assets/images/news3.jpg', 'title': 'Tin tức 3'},
+    {'imageUrl': 'assets/images/news1.jpg', 'title': 'Tin tức 3'},
   ];
 
   @override

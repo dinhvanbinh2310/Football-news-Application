@@ -7,28 +7,38 @@ import 'package:flutter_application_1/components/dashboard_drawer.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
+  const HomeScreen({Key? key}) : super(key: key);
+
   @override
   _HomeScreenState createState() => _HomeScreenState();
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final GlobalKey<ScaffoldState> _scaffoldKey =
-      GlobalKey<ScaffoldState>(); // ✅ Thêm scaffoldKey
-  bool isLoggedIn = false; // ✅ Thêm trạng thái đăng nhập
-  String? _token; // Biến lưu token
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
+  bool isLoggedIn = false;
+  String? _token;
+  int _selectedIndex = 0;
+
   @override
   void initState() {
     super.initState();
-    _getToken(); // Gọi hàm lấy token ngay khi HomeScreen được khởi tạo
+    _getToken();
   }
 
   void _onLoginSuccess() {
     setState(() {
-      isLoggedIn = false; // ✅ Cập nhật trạng thái khi đăng nhập thành công
+      isLoggedIn = true;
     });
   }
 
-  int _selectedIndex = 0; // Trạng thái tab hiện tại
+  Future<void> _getToken() async {
+    final prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+    setState(() {
+      isLoggedIn = token != null;
+      _token = token;
+    });
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -36,46 +46,29 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<void> _getToken() async {
-    final prefs = await SharedPreferences.getInstance();
-    String? token = prefs.getString('token');
-    if (token != null) {
-      print("Token trong home: $token");
-      setState(() {
-        isLoggedIn = true;
-        _token = token; // Lưu token vào biến state
-      });
-    } else {
-      print("Không tìm thấy token!");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      key: _scaffoldKey, // ✅ Gán scaffoldKey vào Scaffold
+      key: _scaffoldKey,
       appBar: TopNavbar(
         title: 'Ứng dụng Flutter',
         scaffoldKey: _scaffoldKey,
-        onLoginSuccess:
-            _onLoginSuccess, // ✅ Truyền callback xử lý đăng nhập thành công
-      ), // ✅ Truyền scaffoldKey vào TopNavbar
-      drawer: DashboardDrawer(), // ✅ Thêm menu Dashboard sổ dọc
+        onLoginSuccess: _onLoginSuccess,
+      ),
+      drawer: DashboardDrawer(),
       body: SingleChildScrollView(
-        padding: EdgeInsets.symmetric(
-          horizontal: 16,
-        ), // ✅ Tạo khoảng cách ngang cho đẹp hơn
+        padding: EdgeInsets.symmetric(horizontal: 16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            NewsWidget(), // Hiển thị danh sách tin tức
+            NewsWidget(),
             SizedBox(height: 20),
             Text(
               "New Arrivals",
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 10),
-            NewArrivals(), // Hiển thị sản phẩm mới
+            NewArrivals(),
             SizedBox(height: 20),
             Center(
               child: Text(

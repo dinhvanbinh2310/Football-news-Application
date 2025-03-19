@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../screens/cart_list_screen.dart';
 
 class TopNavbar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -70,8 +71,9 @@ class _TopNavbarState extends State<TopNavbar> {
           IconButton(
             icon: Icon(Icons.shopping_bag),
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text('Túi của bạn đang trống!')),
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CartListScreen()),
               );
             },
           )
