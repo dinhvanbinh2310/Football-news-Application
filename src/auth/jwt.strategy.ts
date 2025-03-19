@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
@@ -8,11 +8,22 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'my_super_secret_key', // Thay bằng biến môi trường thực tế
+      secretOrKey: configService.get<string>('JWT_SECRET', 'my_super_secret_key'), 
     });
+  
+    if (!configService.get<string>('JWT_SECRET')) {
+      console.warn('⚠️ Warning: JWT_SECRET is missing. Using default secret!');
+    }
   }
+  
 
   async validate(payload: any) {
-    return { userId: payload.sub, email: payload.email, role: payload.role }; // Trả về user để gán vào request.user
+    const userId = payload.sub || payload._id; 
+  
+    if (!userId) {
+      throw new UnauthorizedException('Invalid token');
+    }
+  
+    return { userId, email: payload.email, role: payload.role };
   }
 }
