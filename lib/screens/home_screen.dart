@@ -4,6 +4,7 @@ import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/components/news_widget.dart';
 import 'package:flutter_application_1/components/arrival_widget.dart';
 import 'package:flutter_application_1/components/dashboard_drawer.dart';
+import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -53,9 +54,10 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: TopNavbar(
         title: 'Ứng dụng Flutter',
         scaffoldKey: _scaffoldKey,
-        onLoginSuccess: _onLoginSuccess,
-      ),
-      drawer: DashboardDrawer(),
+        onLoginSuccess:
+            _onLoginSuccess, // ✅ Truyền callback xử lý đăng nhập thành công
+      ), // ✅ Truyền scaffoldKey vào TopNavbar
+      drawer: DashboardDrawer(token: _token), // ✅ Thêm menu Dashboard sổ dọc
       body: SingleChildScrollView(
         padding: EdgeInsets.symmetric(horizontal: 16),
         child: Column(
