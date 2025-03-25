@@ -15,26 +15,24 @@ export class CartService {
   }
 
   async getCart(userId: string): Promise<Cart> {
-    const cart = await this.cartModel.findOne({ userId }).populate('items.productId');
+    const objectId = new Types.ObjectId(userId); 
+    const cart = await this.cartModel.findOne({ userId: objectId }).populate('items.productId');
     if (!cart) throw new NotFoundException('Giỏ hàng không tồn tại');
     return cart;
   }
 
   async updateCart(userId: string, updateCartDto: UpdateCartDto): Promise<Cart> {
-    const cart = await this.cartModel.findOne({ userId: new Types.ObjectId(userId) });
+    const objectId = new Types.ObjectId(userId);
+    const cart = await this.cartModel.findOne({ userId: objectId });
     if (!cart) throw new NotFoundException('Giỏ hàng không tồn tại');
   
-    const itemIndex = cart.items.findIndex(
-      item => item.productId.toString() === updateCartDto.productId
-    );
+    const productObjectId = new Types.ObjectId(updateCartDto.productId);
+    const itemIndex = cart.items.findIndex(item => item.productId.equals(productObjectId));
   
     if (itemIndex !== -1) {
       cart.items[itemIndex].quantity = updateCartDto.quantity;
     } else {
-      cart.items.push({
-        productId: new Types.ObjectId(updateCartDto.productId),
-        quantity: updateCartDto.quantity,
-      });
+      cart.items.push({ productId: productObjectId, quantity: updateCartDto.quantity });
     }
   
     return cart.save();

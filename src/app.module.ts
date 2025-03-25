@@ -11,6 +11,7 @@ import { OrderModule } from './order/order.module';
 import { ChatModule } from './chat/chat.module';
 import { ProductModule } from './product/product.module';
 import { CartModule } from './cart/cart.module';
+import { InvoiceModule } from './invoice/invoice.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +26,7 @@ import { CartModule } from './cart/cart.module';
     ChatModule,
     ProductModule,
     CartModule,
+    InvoiceModule,
   ],
     providers: [AppService],
     controllers: [AppController],
