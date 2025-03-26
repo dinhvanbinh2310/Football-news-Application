@@ -7,13 +7,16 @@ export class Invoice extends Document {
   @Prop({ required: true, type: Types.ObjectId, ref: 'User' })
   userId: Types.ObjectId;
 
-  @Prop([
-    {
-      productId: { type: Types.ObjectId, ref: 'Product', required: true },
-      quantity: { type: Number, required: true },
-      price: { type: Number, required: true },
-    },
-  ])
+  @Prop({
+    type: [
+      {
+        productId: { type: Types.ObjectId, ref: 'Product', required: true },
+        quantity: { type: Number, required: true },
+        price: { type: Number, required: true }, 
+      },
+    ],
+    required: true,
+  })
   items: { productId: Types.ObjectId; quantity: number; price: number }[];
 
   @Prop({ required: true })

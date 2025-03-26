@@ -1,8 +1,8 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
+import { Model } from 'mongoose';
 import { Invoice } from './schemas/invoice.schema';
-import { Product } from 'src/product/schemas/product.schema';
+import { Product } from '../product/schemas/product.schema';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 
 @Injectable()
@@ -13,30 +13,30 @@ export class InvoiceService {
   ) {}
 
   async createInvoice(createInvoiceDto: CreateInvoiceDto): Promise<Invoice> {
-    const { userId, items, totalAmount } = createInvoiceDto;
+    const { userId, items } = createInvoiceDto;
 
-    for (const item of items) {
-      const product = await this.productModel.findById(item.productId);
-      if (!product) {
-        throw new NotFoundException(`Sản phẩm ${item.productId} không tồn tại`);
-      }
-      if (product.stock < item.quantity) {
-        throw new BadRequestException(`Sản phẩm ${product.name} không đủ hàng`);
-      }
+    // Lấy giá sản phẩm từ database
+    const itemsWithPrice = await Promise.all(
+      items.map(async (item) => {
+        const product = await this.productModel.findById(item.productId);
+        if (!product) throw new NotFoundException(`Không tìm thấy sản phẩm ${item.productId}`);
+        
+        return {
+          productId: item.productId,
+          quantity: item.quantity,
+          price: product.price, 
+        };
+      }),
+    );
 
-      // 🚀 Giảm số lượng sản phẩm
-      product.stock -= item.quantity;
-      await product.save();
-    }
+    const totalAmount = itemsWithPrice.reduce((sum, item) => sum + item.quantity * item.price, 0);
 
-    // Tạo hóa đơn
-    const newInvoice = new this.invoiceModel({
-      userId: new Types.ObjectId(userId),
-      items,
+    const invoice = new this.invoiceModel({
+      userId,
+      items: itemsWithPrice,
       totalAmount,
-      status: 'completed',
     });
 
-    return newInvoice.save();
+    return invoice.save();
   }
 }
