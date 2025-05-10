@@ -15,7 +15,7 @@ export class AuthService {
     @InjectModel(User.name) private userModel: Model<UserDocument>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   async register(email: string, password: string) {
     const existingUser = await this.userModel.findOne({ email });
@@ -36,7 +36,7 @@ export class AuthService {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
 
-    
+
     return user;
   }
 
@@ -48,7 +48,7 @@ export class AuthService {
 
     const payload = { sub: user._id, email: user.email, role: user.role };
     const secret = this.configService.get<string>('JWT_SECRET');
-    console.log("JWT_SECRET:", secret);
+    console.log("JWT_SECRET:", user.role);
 
     return {
       access_token: this.jwtService.sign(payload),
@@ -60,7 +60,7 @@ export class AuthService {
     const user = await this.userModel.findById(userId);
 
     if (!user) {
-        throw new UnauthorizedException('Người dùng không tồn tại');
+      throw new UnauthorizedException('Người dùng không tồn tại');
     }
 
     // Log kiểm tra giá trị thực tế
@@ -72,7 +72,7 @@ export class AuthService {
     console.log("✅ Kết quả bcrypt.compare:", isMatch);
 
     if (!isMatch) {
-        throw new BadRequestException('Mật khẩu cũ không đúng');
+      throw new BadRequestException('Mật khẩu cũ không đúng');
     }
 
     // Hash mật khẩu mới trước khi lưu
@@ -86,24 +86,24 @@ export class AuthService {
 
   async resetPassword(email: string, resetCode: string, newPassword: string) {
     const user = await this.userModel.findOne({ email });
-  
+
     if (!user || !user.resetExpires?.getTime() || user.resetCode !== resetCode || user.resetExpires.getTime() < Date.now()) {
       throw new BadRequestException('Mã xác nhận không hợp lệ hoặc đã hết hạn');
     }
-  
+
     // Hash mật khẩu mới
     const hashedPassword = await bcrypt.hash(newPassword, 10);
     user.password = hashedPassword;
-  
+
     // Xóa mã xác nhận sau khi sử dụng
     user.resetCode = undefined;
     user.resetExpires = undefined;
-  
+
     await user.save();
-  
+
     return { message: 'Mật khẩu đã được cập nhật thành công' };
   }
-  
+
 
   async sendResetPasswordEmail(email: string) {
     const user = await this.userModel.findOne({ email });

@@ -9,9 +9,8 @@ import { AppService } from './app.service';
 import { MatchModule } from './match/match.module';
 import { OrderModule } from './order/order.module';
 import { ChatModule } from './chat/chat.module';
-import { ProductModule } from './product/product.module';
-import { CartModule } from './cart/cart.module';
-import { InvoiceModule } from './invoice/invoice.module';
+import { MerchandiseModule } from './merchandise/merchandise.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,11 +23,9 @@ import { InvoiceModule } from './invoice/invoice.module';
     MatchModule,
     OrderModule,
     ChatModule,
-    ProductModule,
-    CartModule,
-    InvoiceModule,
+    MerchandiseModule,
   ],
-    providers: [AppService],
-    controllers: [AppController],
+  providers: [AppService],
+  controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }
