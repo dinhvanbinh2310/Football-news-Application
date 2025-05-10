@@ -9,6 +9,8 @@ import { AppService } from './app.service';
 import { MatchModule } from './match/match.module';
 import { OrderModule } from './order/order.module';
 import { ChatModule } from './chat/chat.module';
+import { MerchandiseModule } from './merchandise/merchandise.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,8 +23,9 @@ import { ChatModule } from './chat/chat.module';
     MatchModule,
     OrderModule,
     ChatModule,
+    MerchandiseModule,
   ],
-    providers: [AppService],
-    controllers: [AppController],
+  providers: [AppService],
+  controllers: [AppController],
 })
-export class AppModule {}
+export class AppModule { }
