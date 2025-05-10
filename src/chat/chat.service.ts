@@ -15,7 +15,7 @@ export class ChatService {
   async generateText(prompt: string): Promise<string> {
     try {
       const response = await this.hf.textGeneration({
-        model: 'microsoft/Phi-3.5-mini-instruct', // Model chuyên tiếng Việt
+        model: '  ', // Model chuyên tiếng Việt
         inputs: prompt,
         parameters: { max_new_tokens: 100, temperature: 0.1  },
       });
@@ -27,3 +27,4 @@ export class ChatService {
     }
   }
 }
+  
