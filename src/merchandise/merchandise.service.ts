@@ -53,7 +53,19 @@ export class MerchandiseService {
         if (merchandise.stock < quantity) {
             throw new Error('Insufficient stock');
         }
-        merchandise.stock -= quantity;
-        return merchandise.save();
+
+        const updatedMerchandise = await this.merchandiseModel
+            .findByIdAndUpdate(
+                id,
+                { $inc: { stock: -quantity } },
+                { new: true }
+            )
+            .exec();
+
+        if (!updatedMerchandise) {
+            throw new NotFoundException(`Merchandise with ID ${id} not found`);
+        }
+
+        return updatedMerchandise;
     }
 } 
