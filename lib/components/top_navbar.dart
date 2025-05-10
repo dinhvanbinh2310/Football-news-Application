@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/screens/admin_panel_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../screens/cart_list_screen.dart';
 
@@ -25,6 +26,7 @@ class TopNavbar extends StatefulWidget implements PreferredSizeWidget {
 class _TopNavbarState extends State<TopNavbar> {
   bool isLoggedIn = false;
   String? token;
+  bool isAdmin = false;
 
   @override
   void initState() {
@@ -32,25 +34,62 @@ class _TopNavbarState extends State<TopNavbar> {
     _checkLoginStatus();
   }
 
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Kiểm tra lại trạng thái mỗi khi widget được build lại
+    _checkLoginStatus();
+  }
+
   Future<void> _checkLoginStatus() async {
     final prefs = await SharedPreferences.getInstance();
     final storedToken = prefs.getString('token');
-    setState(() {
-      token = storedToken;
-      isLoggedIn = storedToken != null;
-    });
+    final userRole = prefs.getString('role');
+
+    if (mounted) {
+      setState(() {
+        token = storedToken;
+        isLoggedIn = storedToken != null;
+        isAdmin = userRole == 'admin';
+        print(
+          'Login status: isLoggedIn=$isLoggedIn, isAdmin=$isAdmin, role=$userRole',
+        );
+      });
+    }
   }
 
   Future<void> _logout(BuildContext context) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');
-    setState(() {
-      isLoggedIn = false;
-    });
-    widget.onLoginSuccess();
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Đã đăng xuất thành công')));
+    await prefs.remove('role');
+
+    if (mounted) {
+      setState(() {
+        isLoggedIn = false;
+        isAdmin = false;
+      });
+      widget.onLoginSuccess();
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Đã đăng xuất thành công')));
+    }
+  }
+
+  void _navigateToAdminPanel(BuildContext context) async {
+    // Kiểm tra lại quyền admin trước khi chuyển trang
+    final prefs = await SharedPreferences.getInstance();
+    final userRole = prefs.getString('role');
+
+    if (userRole == 'admin') {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => AdminPanelScreen()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Bạn không có quyền truy cập trang quản trị!')),
+      );
+    }
   }
 
   @override
@@ -67,6 +106,12 @@ class _TopNavbarState extends State<TopNavbar> {
         },
       ),
       actions: [
+        if (isLoggedIn && isAdmin)
+          IconButton(
+            icon: Icon(Icons.admin_panel_settings),
+            onPressed: () => _navigateToAdminPanel(context),
+            tooltip: 'Quản trị hệ thống',
+          ),
         if (isLoggedIn)
           IconButton(
             icon: Icon(Icons.shopping_bag),
@@ -86,7 +131,7 @@ class _TopNavbarState extends State<TopNavbar> {
               );
 
               if (result == true) {
-                _checkLoginStatus();
+                await _checkLoginStatus();
                 widget.onLoginSuccess();
               }
             },

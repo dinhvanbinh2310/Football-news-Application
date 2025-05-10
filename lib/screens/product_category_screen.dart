@@ -3,6 +3,11 @@ import 'package:flutter_application_1/components/navbar.dart';
 import 'package:flutter_application_1/components/product_card.dart';
 import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:flutter_application_1/components/top_navbar.dart';
+import 'package:flutter_application_1/providers/cart_provider.dart';
+import 'package:flutter_application_1/screens/cart_screen.dart';
+import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ProductCategoryScreen extends StatefulWidget {
   const ProductCategoryScreen({Key? key}) : super(key: key);
@@ -14,6 +19,22 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
   int currentIndex = 0; // Khai báo currentIndex
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoggedIn = false;
+  String? _token;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkLoginStatus();
+  }
+
+  Future<void> _checkLoginStatus() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    setState(() {
+      isLoggedIn = token != null;
+      _token = token;
+    });
+  }
 
   void onTap(int index) {
     setState(() {
@@ -42,8 +63,77 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
   }
 
   void _onLoginSuccess() {
-    setState(() {
-      isLoggedIn = true;
+    _checkLoginStatus();
+  }
+
+  // Hàm kiểm tra đăng nhập và thực hiện hành động
+  Future<bool> _checkLoginAndProceed(Function action) async {
+    if (!isLoggedIn) {
+      final result = await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => LoginScreen()),
+      );
+
+      // Refresh trạng thái đăng nhập sau khi quay lại từ màn hình login
+      await _checkLoginStatus();
+
+      // Nếu đăng nhập thành công và có token
+      if (isLoggedIn) {
+        action();
+        return true;
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Bạn cần đăng nhập để thực hiện chức năng này'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+        return false;
+      }
+    } else {
+      // Đã đăng nhập, thực hiện hành động
+      action();
+      return true;
+    }
+  }
+
+  void _handleAddToCart(String productName, String imageUrl, String price) {
+    _checkLoginAndProceed(() {
+      final cartProvider = Provider.of<CartProvider>(context, listen: false);
+      final priceValue = double.parse(price.replaceAll('\$', ''));
+
+      cartProvider.addItem({
+        'name': productName,
+        'image': imageUrl,
+        'price': priceValue,
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Đã thêm $productName vào giỏ hàng'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    });
+  }
+
+  void _handleBuyNow(String productName, String imageUrl, String price) {
+    _checkLoginAndProceed(() {
+      final cartProvider = Provider.of<CartProvider>(context, listen: false);
+      final priceValue = double.parse(price.replaceAll('\$', ''));
+
+      // Thêm sản phẩm vào giỏ hàng
+      cartProvider.addItem({
+        'name': productName,
+        'image': imageUrl,
+        'price': priceValue,
+      });
+
+      // Chuyển đến trang thanh toán
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const CartScreen()),
+      );
     });
   }
 
@@ -89,10 +179,23 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {
+            final product = products[index];
             return ProductCard(
-              imageUrl: products[index]['image']!,
-              name: products[index]['name']!,
-              price: products[index]['price']!,
+              imageUrl: product['image']!,
+              name: product['name']!,
+              price: product['price']!,
+              onAddToCart:
+                  () => _handleAddToCart(
+                    product['name']!,
+                    product['image']!,
+                    product['price']!,
+                  ),
+              onBuy:
+                  () => _handleBuyNow(
+                    product['name']!,
+                    product['image']!,
+                    product['price']!,
+                  ),
             );
           },
         ),
