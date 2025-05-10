@@ -1,8 +1,9 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  static const String baseUrl = "http://10.0.2.2:3000";
+  static const String baseUrl = "http://localhost:3000";
 
   // Đăng ký tài khoản
   static Future<Map<String, dynamic>> register(
@@ -44,7 +45,25 @@ class ApiService {
     print("📡 API Response Body: ${response.body}");
 
     if (response.statusCode == 200 || response.statusCode == 201) {
-      return jsonDecode(response.body);
+      final data = jsonDecode(response.body);
+
+      // Lưu token vào SharedPreferences
+      if (data.containsKey('access_token')) {
+        final token = data['access_token'];
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', token);
+
+        // Lưu role nếu có
+        if (data.containsKey('user') &&
+            data['user'] is Map &&
+            data['user'].containsKey('role')) {
+          final role = data['user']['role'];
+          await prefs.setString('role', role);
+          print("Login success: role=$role, token=$token");
+        }
+      }
+
+      return data;
     } else {
       throw Exception("Đăng nhập thất bại! Lỗi: ${response.body}");
     }

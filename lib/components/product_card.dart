@@ -4,12 +4,16 @@ class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String price;
+  final VoidCallback? onBuy;
+  final VoidCallback? onAddToCart;
 
   const ProductCard({
     Key? key,
     required this.imageUrl,
     required this.name,
     required this.price,
+    this.onBuy,
+    this.onAddToCart,
   }) : super(key: key);
 
   @override
@@ -45,7 +49,40 @@ class ProductCard extends StatelessWidget {
               style: const TextStyle(fontSize: 14, color: Colors.black54),
             ),
           ),
-          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Row(
+              children: [
+                Expanded(
+                  child: OutlinedButton(
+                    onPressed: onAddToCart,
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: Colors.blue,
+                      side: const BorderSide(color: Colors.blue),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Thêm giỏ hàng'),
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: onBuy,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: const Text('Mua ngay'),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

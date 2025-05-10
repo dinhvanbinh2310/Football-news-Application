@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ChatService {
   final String baseUrl =
-      'http://localhost:3000/chat/ask'; // Thay localhost bằng IP nếu gọi từ mobile device
+      'http://localhost:3000/chat/ask'; // Nếu chạy trên mobile, thay localhost bằng IP
 
   Future<String> askChatbot(String prompt) async {
     try {
@@ -17,8 +17,16 @@ class ChatService {
       print('🔹 Response Body: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        return data['message']; // Đọc từ key "message"
+        try {
+          final data = jsonDecode(response.body);
+          if (data is Map<String, dynamic> && data.containsKey('message')) {
+            return data['message'];
+          } else {
+            return 'Invalid JSON format: Missing "message" key';
+          }
+        } catch (e) {
+          return '${response.body}';
+        }
       } else {
         return 'Server Error: ${response.statusCode}, ${response.body}';
       }

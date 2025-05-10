@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/forgot_password_screen.dart';
-import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/screens/register_screen.dart';
@@ -23,17 +22,18 @@ class _LoginScreenState extends State<LoginScreen> {
         emailController.text,
         passwordController.text,
       );
-      final prefs = await SharedPreferences.getInstance();
+
       if (response.containsKey('access_token')) {
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('token', response['access_token']);
+        // Không cần lưu token ở đây vì đã được xử lý trong ApiService.login
+
+        // Return true to indicate successful login
+        Navigator.pop(context, true);
       } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Invalid credentials")));
         return;
       }
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => HomeScreen()),
-      );
     } catch (error) {
       print("Lỗi đăng nhập: $error"); // Debug lỗi
       ScaffoldMessenger.of(context).showSnackBar(
@@ -158,15 +158,23 @@ class _LoginScreenState extends State<LoginScreen> {
                   TextButton(
                     onPressed:
                         () => Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => ForgotPasswordScreen(),
-                      ),
-                    ),
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ForgotPasswordScreen(),
+                          ),
+                        ),
                     child: Text(
                       "Quên mật khẩu",
                       style: TextStyle(color: Colors.white),
                     ),
+                  ),
+
+                  SizedBox(height: 20),
+
+                  // Demo hint text
+                  Text(
+                    "Demo admin: admin@example.com / admin123",
+                    style: TextStyle(color: Colors.white70, fontSize: 12),
                   ),
                 ],
               ),
