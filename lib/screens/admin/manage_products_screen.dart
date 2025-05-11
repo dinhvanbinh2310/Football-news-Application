@@ -7,6 +7,9 @@ import 'package:image_picker/image_picker.dart';
 import 'package:path/path.dart' as path;
 import 'package:path_provider/path_provider.dart';
 import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ManageProductsScreen extends StatefulWidget {
   final bool isCreating;
@@ -31,36 +34,8 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
   // Thêm các biến cho Web
   Uint8List? webImage;
 
-  // Dữ liệu mẫu cho danh sách sản phẩm
-  final List<Map<String, dynamic>> _products = [
-    {
-      'id': '1',
-      'name': 'Áo Liverpool Đỏ',
-      'price': 100.0,
-      'category': 'Áo đấu',
-      'imageUrl': 'assets/images/ao-liv-do.jpg',
-      'description': 'Áo đấu sân nhà của Liverpool mùa giải 2023/2024',
-      'stock': 15,
-    },
-    {
-      'id': '2',
-      'name': 'Áo Manchester United',
-      'price': 120.0,
-      'category': 'Áo đấu',
-      'imageUrl': 'assets/images/ao-mu-do.jpg',
-      'description': 'Áo đấu sân nhà của Manchester United mùa giải 2023/2024',
-      'stock': 10,
-    },
-    {
-      'id': '3',
-      'name': 'Giày đá bóng Nike Mercurial',
-      'price': 150.0,
-      'category': 'Giày đá bóng',
-      'imageUrl': 'assets/images/product1.jpg',
-      'description': 'Giày đá bóng Nike Mercurial Superfly 8 Elite FG',
-      'stock': 8,
-    },
-  ];
+  // Thay thế danh sách sản phẩm mẫu bằng danh sách động
+  List<Map<String, dynamic>> _products = [];
 
   final List<String> _categories = [
     'Áo đấu',
@@ -81,6 +56,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
   @override
   void initState() {
     super.initState();
+    _fetchProducts();
 
     // Nếu màn hình được mở với cờ isCreating, hiển thị form tạo sản phẩm ngay lập tức
     if (widget.isCreating) {
@@ -94,6 +70,72 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
     if (widget.isFilteringByCategory) {
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _showCategoryFilterDialog();
+      });
+    }
+  }
+
+  Future<void> _fetchProducts() async {
+    setState(() {
+      isLoading = true;
+    });
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final token = prefs.getString('token');
+
+      if (token == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Vui lòng đăng nhập lại!')),
+        );
+        return;
+      }
+
+      final url = Uri.parse('http://localhost:3000/merchandise');
+      final response = await http.get(
+        url,
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $token",
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          _products =
+              data
+                  .map<Map<String, dynamic>>(
+                    (item) => {
+                      ...item,
+                      'name': item['name'] ?? 'Không rõ tên',
+                      'category': item['category'] ?? 'Không rõ danh mục',
+                      'price': item['price'] ?? 0,
+                      'stock': item['stock'] ?? 0,
+                      'description': item['description'] ?? '',
+                      'imageUrl':
+                          (item['image'] is List &&
+                                  item['image'] != null &&
+                                  item['image'].isNotEmpty)
+                              ? item['image'][0]
+                              : 'assets/images/product_placeholder.jpg',
+                    },
+                  )
+                  .toList();
+        });
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Lỗi khi tải danh sách sản phẩm: ${response.body}'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi khi tải danh sách sản phẩm: $e')),
+      );
+    } finally {
+      setState(() {
+        isLoading = false;
       });
     }
   }
@@ -176,18 +218,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                     ),
                     IconButton(
                       icon: const Icon(Icons.refresh),
-                      onPressed: () {
-                        setState(() {
-                          isLoading = true;
-                        });
-
-                        // Simulate API call
-                        Future.delayed(const Duration(seconds: 1), () {
-                          setState(() {
-                            isLoading = false;
-                          });
-                        });
-                      },
+                      onPressed: _fetchProducts,
                       tooltip: 'Làm mới danh sách',
                     ),
                   ],
@@ -268,7 +299,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                   borderRadius: const BorderRadius.vertical(
                     top: Radius.circular(16),
                   ),
-                  child: _buildProductImage(product['imageUrl']),
+                  child: _buildProductImage(product['imageUrl'] as String?),
                 ),
               ),
               // Product Info
@@ -280,7 +311,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        product['name'],
+                        product['name'] ?? 'Không rõ tên',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 14,
@@ -290,7 +321,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '\$${product['price']}',
+                        '\$${product['price'] ?? 0}',
                         style: TextStyle(
                           color: Colors.blue.shade700,
                           fontWeight: FontWeight.bold,
@@ -299,17 +330,19 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        product['category'],
+                        product['category'] ?? 'Không rõ danh mục',
                         style: TextStyle(
                           color: Colors.grey.shade600,
                           fontSize: 12,
                         ),
                       ),
                       Text(
-                        'Còn ${product['stock']} sản phẩm',
+                        'Còn ${product['stock'] ?? 0} sản phẩm',
                         style: TextStyle(
                           color:
-                              product['stock'] > 0 ? Colors.green : Colors.red,
+                              (product['stock'] ?? 0) > 0
+                                  ? Colors.green
+                                  : Colors.red,
                           fontSize: 12,
                         ),
                       ),
@@ -345,35 +378,32 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
   }
 
   // Phương thức mới để hiển thị hình ảnh sản phẩm (xử lý cả đường dẫn tương đối và đường dẫn File)
-  Widget _buildProductImage(String imageUrl) {
-    if (imageUrl.startsWith('assets/')) {
-      // Đường dẫn assets
+  Widget _buildProductImage(String? imageUrl) {
+    final url = imageUrl ?? 'assets/images/product_placeholder.jpg';
+    if (url.startsWith('assets/')) {
       return Image.asset(
-        imageUrl,
+        url,
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => _buildImageErrorWidget(),
       );
-    } else if (imageUrl.startsWith('/') && !kIsWeb) {
-      // Đường dẫn file (chỉ cho mobile)
+    } else if (url.startsWith('/') && !kIsWeb) {
       return Image.file(
-        File(imageUrl),
+        File(url),
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => _buildImageErrorWidget(),
       );
-    } else if (imageUrl.startsWith('data:')) {
-      // Xử lý Data URL cho web
+    } else if (url.startsWith('data:')) {
       return Image.network(
-        imageUrl,
+        url,
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => _buildImageErrorWidget(),
       );
     } else {
-      // Đường dẫn network (URL) hoặc khác
       return Image.network(
-        imageUrl,
+        url,
         width: double.infinity,
         fit: BoxFit.cover,
         errorBuilder: (context, error, stackTrace) => _buildImageErrorWidget(),
@@ -633,66 +663,46 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
                         try {
                           final price = double.parse(priceController.text);
                           final stock = int.parse(stockController.text);
-
-                          // Xử lý hình ảnh nếu đã chọn
                           String finalImagePath =
                               'assets/images/product_placeholder.jpg';
-
-                          // Sử dụng đường dẫn hình ảnh đã được xử lý
                           if (imagePath != null && imagePath!.isNotEmpty) {
                             finalImagePath = imagePath!;
                           }
 
-                          if (product == null) {
-                            // Add product
-                            setState(() {
-                              _products.add({
-                                'id': ((_products.length + 1).toString()),
-                                'name': nameController.text,
-                                'price': price,
-                                'category': category,
-                                'imageUrl': finalImagePath,
-                                'description': descriptionController.text,
-                                'stock': stock,
-                              });
-                            });
+                          // Chuẩn hóa dữ liệu sản phẩm
+                          final newProduct = {
+                            "name": nameController.text,
+                            "description": descriptionController.text,
+                            "price": price,
+                            "size": [
+                              "S",
+                              "M",
+                              "L",
+                              "XL",
+                            ], // Có thể cho chọn động nếu muốn
+                            "color": [
+                              "Đỏ",
+                              "Trắng",
+                              "Đen",
+                            ], // Có thể cho chọn động nếu muốn
+                            "category": category,
+                            "stock": stock,
+                            "image": [
+                              finalImagePath,
+                            ], // Có thể cho chọn nhiều ảnh nếu muốn
+                            "isAvailable": true,
+                          };
 
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Thêm sản phẩm mới thành công'),
-                              ),
-                            );
-                          } else {
-                            // Update product
-                            setState(() {
-                              final index = _products.indexWhere(
-                                (p) => p['id'] == product['id'],
-                              );
-                              if (index != -1) {
-                                _products[index] = {
-                                  'id': product['id'],
-                                  'name': nameController.text,
-                                  'price': price,
-                                  'category': category,
-                                  'imageUrl': finalImagePath,
-                                  'description': descriptionController.text,
-                                  'stock': stock,
-                                };
-                              }
-                            });
-
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Cập nhật sản phẩm thành công'),
-                              ),
-                            );
-                          }
-
+                          await _createProductApi(newProduct);
                           Navigator.pop(context);
-                        } catch (e) {
-                          ScaffoldMessenger.of(
-                            context,
-                          ).showSnackBar(SnackBar(content: Text('Lỗi: $e')));
+                        } catch (e, stackTrace) {
+                          print('Lỗi khi gửi API: $e');
+                          print('StackTrace: $stackTrace');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Đã xảy ra lỗi khi tạo sản phẩm'),
+                            ),
+                          );
                         }
                       },
                       child: Text(product == null ? 'Thêm' : 'Lưu'),
@@ -738,5 +748,37 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
             ],
           ),
     );
+  }
+
+  Future<void> _createProductApi(Map<String, dynamic> product) async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Vui lòng đăng nhập lại!')));
+      return;
+    }
+
+    final url = Uri.parse('http://localhost:3000/merchandise');
+    final response = await http.post(
+      url,
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer $token",
+      },
+      body: jsonEncode(product),
+    );
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      // Thành công
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Tạo sản phẩm thành công!')));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Tạo sản phẩm thất bại: ${response.body}')),
+      );
+    }
   }
 }

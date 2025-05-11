@@ -30,6 +30,19 @@ class ApiService {
   }
 
   // Đăng nhập
+
+  static Map<String, dynamic> _parseJwt(String token) {
+    final parts = token.split('.');
+    if (parts.length != 3) {
+      throw Exception('Token không hợp lệ');
+    }
+
+    final payload = parts[1];
+    final normalized = base64Url.normalize(payload);
+    final payloadString = utf8.decode(base64Url.decode(normalized));
+    return json.decode(payloadString);
+  }
+
   static Future<Map<String, dynamic>> login(
     String email,
     String password,
@@ -46,21 +59,18 @@ class ApiService {
 
     if (response.statusCode == 200 || response.statusCode == 201) {
       final data = jsonDecode(response.body);
-
-      // Lưu token vào SharedPreferences
+      print("📡 API Response Data: $data");
       if (data.containsKey('access_token')) {
         final token = data['access_token'];
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('token', token);
 
-        // Lưu role nếu có
-        if (data.containsKey('user') &&
-            data['user'] is Map &&
-            data['user'].containsKey('role')) {
-          final role = data['user']['role'];
-          await prefs.setString('role', role);
-          print("Login success: role=$role, token=$token");
-        }
+        // Decode token để lấy role
+        final payload = _parseJwt(token);
+        final role = payload['role'] ?? 'user';
+        await prefs.setString('role', role);
+
+        print("✅ Login success: role=$role, token=$token");
       }
 
       return data;
