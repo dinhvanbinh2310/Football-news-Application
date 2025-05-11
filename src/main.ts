@@ -5,8 +5,8 @@ import * as bodyParser from 'body-parser';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
-  app.use(bodyParser.json()); // ✅ Xử lý JSON body
-  app.use(bodyParser.urlencoded({ extended: true })); 
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ extended: true, limit: '10mb' }));
 
   app.enableCors();
   await app.listen(process.env.PORT ?? 3000);
