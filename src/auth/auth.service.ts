@@ -32,7 +32,6 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User> {
     const user = await this.userModel.findOne({ email });
-    console.log(await this.userModel.find({}));
     if (!user) {
       throw new UnauthorizedException('Tài khoản không tồn tại');
     }
@@ -46,11 +45,8 @@ export class AuthService {
       loginUserDto.email,
       loginUserDto.password,
     );
-
     const payload = { sub: user._id, email: user.email, role: user.role };
     const secret = this.configService.get<string>('JWT_SECRET');
-    console.log("JWT_SECRET:", user.role);
-
     return {
       access_token: this.jwtService.sign(payload),
     };
