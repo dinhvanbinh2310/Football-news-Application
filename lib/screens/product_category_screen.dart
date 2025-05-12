@@ -6,8 +6,11 @@ import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/providers/cart_provider.dart';
 import 'package:flutter_application_1/screens/cart_screen.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/models/merchandise.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class ProductCategoryScreen extends StatefulWidget {
   const ProductCategoryScreen({Key? key}) : super(key: key);
@@ -16,15 +19,45 @@ class ProductCategoryScreen extends StatefulWidget {
 }
 
 class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
-  int currentIndex = 0; // Khai báo currentIndex
+  int currentIndex = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   bool isLoggedIn = false;
   String? _token;
+  List<Merchandise> products = [];
+  bool isLoading = true;
+  String? error;
 
   @override
   void initState() {
     super.initState();
     _checkLoginStatus();
+    _fetchProducts();
+  }
+
+  Future<void> _fetchProducts() async {
+    try {
+      final response = await http.get(
+        Uri.parse('http://localhost:3000/merchandise'),
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        setState(() {
+          products = data.map((json) => Merchandise.fromJson(json)).toList();
+          isLoading = false;
+        });
+      } else {
+        setState(() {
+          error = 'Failed to load products';
+          isLoading = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        error = 'Error: $e';
+        isLoading = false;
+      });
+    }
   }
 
   Future<void> _checkLoginStatus() async {
@@ -97,17 +130,23 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
     }
   }
 
-  void _handleAddToCart(String productName, String imageUrl, String price) {
+  void _handleAddToCart(
+    String productName,
+    String imageUrl,
+    String price,
+    String productId,
+  ) {
     _checkLoginAndProceed(() {
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
       final priceValue = double.parse(price.replaceAll('\$', ''));
 
       cartProvider.addItem({
+        '_id': productId,
         'name': productName,
         'image': imageUrl,
         'price': priceValue,
       });
-
+      print('Đã thêm $productId vào giỏ hàng');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Đã thêm $productName vào giỏ hàng'),
@@ -117,7 +156,12 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
     });
   }
 
-  void _handleBuyNow(String productName, String imageUrl, String price) {
+  void _handleBuyNow(
+    String productName,
+    String imageUrl,
+    String price,
+    String productId,
+  ) {
     _checkLoginAndProceed(() {
       final cartProvider = Provider.of<CartProvider>(context, listen: false);
       final priceValue = double.parse(price.replaceAll('\$', ''));
@@ -127,9 +171,9 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
         'name': productName,
         'image': imageUrl,
         'price': priceValue,
+        '_id': productId,
       });
 
-      // Chuyển đến trang thanh toán
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => const CartScreen()),
@@ -139,67 +183,58 @@ class _ProductCategoryScreenState extends State<ProductCategoryScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List<Map<String, String>> products = [
-      {
-        'image': 'assets/images/ao-liv-do.jpg',
-        'name': 'áo Livepool đỏ',
-        'price': '\$100',
-      },
-      {
-        'image': 'assets/images/ao-liverpool-trangnau.jpg',
-        'name': 'áo Livepool trắng nâu',
-        'price': '\$100',
-      },
-      {
-        'image': 'assets/images/ao-mu-do.jpg',
-        'name': 'áo Manchester United',
-        'price': '\$120',
-      },
-      {
-        'image': 'assets/images/ao-mu-xanhden.jpg',
-        'name': 'áo Manchester United xanh đen',
-        'price': '\$120',
-      },
-    ];
-
     return Scaffold(
       appBar: TopNavbar(
         title: "Danh mục sản phẩm",
         scaffoldKey: _scaffoldKey,
         onLoginSuccess: _onLoginSuccess,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: GridView.builder(
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2, // Hiển thị 2 cột
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 0.7, // Tỉ lệ chiều rộng / chiều cao
-          ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ProductCard(
-              imageUrl: product['image']!,
-              name: product['name']!,
-              price: product['price']!,
-              onAddToCart:
-                  () => _handleAddToCart(
-                    product['name']!,
-                    product['image']!,
-                    product['price']!,
+      body:
+          isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : error != null
+              ? Center(child: Text(error!))
+              : Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: GridView.builder(
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 0.7,
                   ),
-              onBuy:
-                  () => _handleBuyNow(
-                    product['name']!,
-                    product['image']!,
-                    product['price']!,
-                  ),
-            );
-          },
-        ),
-      ),
+                  itemCount: products.length,
+                  itemBuilder: (context, index) {
+                    final product = products[index];
+                    return ProductCard(
+                      imageUrl:
+                          product.image.isNotEmpty
+                              ? product.image[0]
+                              : 'assets/images/placeholder.jpg',
+                      name: product.name,
+                      price: '\$${product.price.toStringAsFixed(2)}',
+                      onAddToCart:
+                          () => _handleAddToCart(
+                            product.name,
+                            product.image.isNotEmpty
+                                ? product.image[0]
+                                : 'assets/images/placeholder.jpg',
+                            '\$${product.price.toStringAsFixed(2)}',
+                            product.id,
+                          ),
+                      onBuy:
+                          () => _handleBuyNow(
+                            product.name,
+                            product.image.isNotEmpty
+                                ? product.image[0]
+                                : 'assets/images/placeholder.jpg',
+                            '\$${product.price.toStringAsFixed(2)}',
+                            product.id,
+                          ),
+                    );
+                  },
+                ),
+              ),
       bottomNavigationBar: Navbar(currentIndex: currentIndex, onTap: onTap),
     );
   }

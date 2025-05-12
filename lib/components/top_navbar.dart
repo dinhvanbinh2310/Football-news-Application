@@ -51,9 +51,6 @@ class _TopNavbarState extends State<TopNavbar> {
         token = storedToken;
         isLoggedIn = storedToken != null;
         isAdmin = userRole == 'admin';
-        print(
-          'Login status: isLoggedIn=$isLoggedIn, isAdmin=$isAdmin, role=$userRole',
-        );
       });
     }
   }
@@ -95,7 +92,35 @@ class _TopNavbarState extends State<TopNavbar> {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      title: Text(widget.title, style: TextStyle(fontWeight: FontWeight.bold)),
+      title: SizedBox(
+        height: 40,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            GestureDetector(
+              onTap: () {
+                Navigator.of(context).popUntil((route) => route.isFirst);
+              },
+              child: Image.asset(
+                'assets/images/logo.png',
+                height: 32,
+                width: 32,
+                fit: BoxFit.contain,
+              ),
+            ),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                widget.title,
+                style: TextStyle(fontWeight: FontWeight.bold),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          ],
+        ),
+      ),
       centerTitle: true,
       backgroundColor: Colors.blue,
       elevation: 4,
