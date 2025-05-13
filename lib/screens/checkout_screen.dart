@@ -4,6 +4,9 @@ import 'package:flutter_application_1/providers/cart_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:typed_data';
 
 class CheckoutScreen extends StatefulWidget {
   const CheckoutScreen({Key? key}) : super(key: key);
@@ -84,6 +87,28 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     _phoneController.dispose();
     _emailController.dispose();
     super.dispose();
+  }
+
+  Widget buildImageFromBase64(String? base64Data) {
+    if (base64Data == null || base64Data.isEmpty) {
+      return const Icon(Icons.image_not_supported);
+    }
+
+    if (base64Data.startsWith('data:image')) {
+      try {
+        final base64Str = base64Data.split(',').last;
+        Uint8List bytes = base64Decode(base64Str);
+        return Image.memory(bytes, fit: BoxFit.cover);
+      } catch (e) {
+        return const Icon(Icons.broken_image);
+      }
+    }
+
+    if (base64Data.startsWith('http')) {
+      return Image.network(base64Data);
+    }
+
+    return const Icon(Icons.image_not_supported);
   }
 
   // Widget hiển thị QR code và thông tin tài khoản
@@ -177,6 +202,59 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
     );
   }
 
+  Future<void> _submitOrder(cartItems) async {
+    if (cartItems.isEmpty) return;
+    if (_token == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Bạn cần đăng nhập để đặt hàng.')),
+      );
+      return;
+    }
+
+    // Gửi từng sản phẩm trong giỏ hàng lên API bookings
+    bool allSuccess = true;
+    for (var item in cartItems) {
+      final bookingData = {
+        'merchandiseId': item['_id'],
+        'quantity': 1, // hoặc item['quantity'] nếu có
+        'size': 'M',
+        'color': 'red',
+        'shippingAddress': _addressController.text,
+        'phoneNumber': _phoneController.text,
+        'note': '',
+      };
+      final response = await http.post(
+        Uri.parse('http://localhost:3000/bookings'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $_token',
+        },
+        body: jsonEncode(bookingData),
+      );
+      if (response.statusCode != 201 && response.statusCode != 200) {
+        allSuccess = false;
+        break;
+      }
+    }
+
+    if (allSuccess) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _paymentMethod == 'Thanh toán khi nhận hàng'
+                ? 'Đặt hàng thành công!'
+                : 'Đặt hàng thành công! Vui lòng hoàn tất thanh toán để xử lý đơn hàng.',
+          ),
+        ),
+      );
+      Navigator.popUntil(context, ModalRoute.withName('/'));
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Đặt hàng thất bại. Vui lòng thử lại!')),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final cartProvider = Provider.of<CartProvider>(context);
@@ -244,12 +322,10 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                                             decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(8),
-                                              image: DecorationImage(
-                                                image: AssetImage(
-                                                  item['image'],
-                                                ),
-                                                fit: BoxFit.cover,
-                                              ),
+                                              color: Colors.grey[200],
+                                            ),
+                                            child: buildImageFromBase64(
+                                              item['image'],
                                             ),
                                           ),
                                         );
@@ -411,28 +487,9 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
-                              onPressed: () {
+                              onPressed: () async {
                                 if (_formKey.currentState!.validate()) {
-                                  // Process the order
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(
-                                      content: Text(
-                                        _paymentMethod ==
-                                                'Thanh toán khi nhận hàng'
-                                            ? 'Đặt hàng thành công!'
-                                            : 'Đặt hàng thành công! Vui lòng hoàn tất thanh toán để xử lý đơn hàng.',
-                                      ),
-                                    ),
-                                  );
-
-                                  // Clear cart
-                                  cartProvider.clearCart();
-
-                                  // Go back to home
-                                  Navigator.popUntil(
-                                    context,
-                                    ModalRoute.withName('/'),
-                                  );
+                                  await _submitOrder(cartItems);
                                 }
                               },
                               style: ElevatedButton.styleFrom(
