@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 
 class ChatService {
   final String baseUrl =
-      'http://localhost:3000/chat/ask'; // Nếu chạy trên mobile, thay localhost bằng IP
+      'http://10.0.2.2:3000/chat/ask'; // Nếu chạy trên mobile, thay localhost bằng IP
 
   Future<String> askChatbot(String prompt) async {
     try {
