@@ -10,6 +10,7 @@ import { MatchModule } from './match/match.module';
 import { OrderModule } from './order/order.module';
 import { ChatModule } from './chat/chat.module';
 import { MerchandiseModule } from './merchandise/merchandise.module';
+import { NewsModule } from './news/news.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { MerchandiseModule } from './merchandise/merchandise.module';
     OrderModule,
     ChatModule,
     MerchandiseModule,
+    NewsModule,
   ],
   providers: [AppService],
   controllers: [AppController],
