@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/screens/admin/manage_products_screen.dart';
 import 'package:flutter_application_1/screens/admin/manage_users_screen.dart';
+import 'package:flutter_application_1/screens/admin/manage_news_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdminPanelScreen extends StatefulWidget {
@@ -96,6 +97,32 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 [
                   AdminFeature("Danh sách đơn hàng", Icons.receipt_long, () {}),
                   AdminFeature("Xác nhận đơn hàng", Icons.check_circle, () {}),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              _buildManagementSection(
+                context,
+                "Quản lý tin tức",
+                Icons.add_circle,
+                Colors.orange,
+                [
+                  AdminFeature(
+                    "Thêm tin mới",
+                    Icons.add_circle,
+                        () => _navigateToNewsManagement(isCreating: true),
+                  ),
+                  AdminFeature(
+                    "Danh sách tin",
+                    Icons.list,
+                        () => _navigateToNewsManagement(),
+                  ),
+                  AdminFeature(
+                    "Tìm kiếm theo danh mục",
+                    Icons.category,
+                        () => _navigateToNewsManagement(isFilteringByCategory: true),
+                    ),
                 ],
               ),
             ],
@@ -206,6 +233,22 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
       MaterialPageRoute(builder: (context) => const ManageUsersScreen()),
     );
   }
+
+  void _navigateToNewsManagement({
+    bool isCreating = false,
+    bool isFilteringByCategory = false,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ManageNewsScreen(
+          isCreating: isCreating,
+          isFilteringByCategory: isFilteringByCategory,
+        ),
+      ),
+    );
+  }
+
 
   void _navigateToProductManagement({
     bool isCreating = false,
