@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/screens/admin/manage_products_screen.dart';
 import 'package:flutter_application_1/screens/admin/manage_users_screen.dart';
+import 'package:flutter_application_1/screens/admin/manage_bookings_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdminPanelScreen extends StatefulWidget {
@@ -94,8 +95,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 Icons.shopping_cart_checkout,
                 Colors.green,
                 [
-                  AdminFeature("Danh sách đơn hàng", Icons.receipt_long, () {}),
-                  AdminFeature("Xác nhận đơn hàng", Icons.check_circle, () {}),
+                  AdminFeature(
+                    "Danh sách đơn hàng",
+                    Icons.receipt_long,
+                    () => _navigateToBookingManagement(),
+                  ),
+                  AdminFeature(
+                    "Xác nhận đơn hàng",
+                    Icons.check_circle,
+                    () => _navigateToBookingManagement(),
+                  ),
                 ],
               ),
             ],
@@ -220,6 +229,13 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               isFilteringByCategory: isFilteringByCategory,
             ),
       ),
+    );
+  }
+
+  void _navigateToBookingManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ManageBookingsScreen()),
     );
   }
 }
