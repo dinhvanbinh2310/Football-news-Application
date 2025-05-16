@@ -12,6 +12,7 @@ export class BookingController {
 
     @Post()
     create(@Request() req, @Body() createBookingDto: CreateBookingDto) {
+        console.log('Received booking:', createBookingDto); // 🪵 debug
         return this.bookingService.create(req.user.userId, createBookingDto);
     }
 

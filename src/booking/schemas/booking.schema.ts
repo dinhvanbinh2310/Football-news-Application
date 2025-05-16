@@ -2,8 +2,12 @@ import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
 import { User } from '../../user/schemas/user.schema';
 import { Merchandise } from '../../merchandise/schemas/merchandise.schema';
+import { Types } from 'mongoose';
 
-export type BookingDocument = Booking & Document;
+export type BookingDocument = Booking & Document & {
+    merchandise: Types.ObjectId | (Merchandise & { _id: Types.ObjectId });
+    user: Types.ObjectId | { _id: Types.ObjectId; email?: string; fullName?: string };
+};
 
 @Schema({ timestamps: true })
 export class Booking {

@@ -1,9 +1,11 @@
-import { IsString, IsNumber, IsEnum, IsOptional } from 'class-validator';
+import { IsString, IsNumber, IsOptional } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateBookingDto {
     @IsString()
     merchandiseId: string;
 
+    @Type(() => Number)
     @IsNumber()
     quantity: number;
 
@@ -22,4 +24,4 @@ export class CreateBookingDto {
     @IsString()
     @IsOptional()
     note?: string;
-} 
+}
