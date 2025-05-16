@@ -6,10 +6,12 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class BookingDetailsScreen extends StatefulWidget {
   final Map<String, dynamic> booking;
+  final VoidCallback onStatusUpdated;
 
   const BookingDetailsScreen({
     Key? key,
     required this.booking,
+    required this.onStatusUpdated,
   }) : super(key: key);
 
   @override
@@ -32,19 +34,13 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
     return prefs.getString('token');
   }
 
-  Future<void> updateBookingStatus(String newStatus) async {
-    setState(() {
-      isLoading = true;
-      error = '';
-    });
-
+  Future<void> _updateStatus(String newStatus) async {
     try {
       final token = await _getToken();
       if (token == null) {
-        setState(() {
-          error = 'Không tìm thấy token đăng nhập';
-          isLoading = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Không tìm thấy token đăng nhập')),
+        );
         return;
       }
 
@@ -59,27 +55,20 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
       );
 
       if (response.statusCode == 200) {
-        setState(() {
-          currentStatus = newStatus;
-          isLoading = false;
-        });
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Cập nhật trạng thái thành công'),
-            backgroundColor: Colors.green,
-          ),
+          const SnackBar(content: Text('Cập nhật trạng thái thành công')),
         );
+        widget.onStatusUpdated();
+        Navigator.pop(context);
       } else {
-        setState(() {
-          error = 'Lỗi khi cập nhật trạng thái: ${response.statusCode}';
-          isLoading = false;
-        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Lỗi: ${response.body}')),
+        );
       }
     } catch (e) {
-      setState(() {
-        error = 'Lỗi kết nối: $e';
-        isLoading = false;
-      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Lỗi: $e')),
+      );
     }
   }
 
@@ -247,7 +236,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
   Widget _buildStatusButton(String status, String label) {
     final isSelected = currentStatus == status;
     return ElevatedButton(
-      onPressed: isSelected ? null : () => updateBookingStatus(status),
+      onPressed: isSelected ? null : () => _updateStatus(status),
       style: ElevatedButton.styleFrom(
         backgroundColor:
             isSelected ? _getStatusColor(status) : Colors.grey[200],

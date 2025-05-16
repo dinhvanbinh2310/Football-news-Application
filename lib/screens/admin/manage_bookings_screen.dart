@@ -103,35 +103,30 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Đơn hàng #${booking['_id']}',
-                                    style: GoogleFonts.poppins(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                              Text(
+                                'Đơn hàng #${booking['_id']}',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: _getStatusColor(booking['status']),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Text(
+                                  booking['status'] ?? 'Pending',
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 6,
-                                    ),
-                                    decoration: BoxDecoration(
-                                      color: _getStatusColor(booking['status']),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      booking['status'] ?? 'Pending',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
                               const SizedBox(height: 16),
                               _buildInfoRow('Tổng tiền:',
@@ -157,6 +152,7 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                                           builder: (context) =>
                                               BookingDetailsScreen(
                                             booking: booking,
+                                            onStatusUpdated: fetchBookings,
                                           ),
                                         ),
                                       );
@@ -172,6 +168,7 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
                                           builder: (context) =>
                                               BookingDetailsScreen(
                                             booking: booking,
+                                            onStatusUpdated: fetchBookings,
                                           ),
                                         ),
                                       );
