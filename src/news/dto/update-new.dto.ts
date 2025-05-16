@@ -1,6 +1,4 @@
-export class UpdateNewDTO{
-    title?: string;
-    content?: string;
-    imageUrl?: string;
-    description?: string;
-}
+import { PartialType } from '@nestjs/mapped-types';
+import { CreateNewsDto } from './create-new.dto';
+
+export class UpdateNewsDto extends PartialType(CreateNewsDto) {}
