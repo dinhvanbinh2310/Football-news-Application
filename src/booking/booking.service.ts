@@ -4,6 +4,8 @@ import { Model } from 'mongoose';
 import { Booking, BookingDocument } from './schemas/booking.schema';
 import { CreateBookingDto } from './dto/create-booking.dto';
 import { MerchandiseService } from '../merchandise/merchandise.service';
+import { InternalServerErrorException } from '@nestjs/common';
+
 
 @Injectable()
 export class BookingService {
@@ -18,21 +20,11 @@ export class BookingService {
         // Kiểm tra sản phẩm tồn tại
         const merchandise = await this.merchandiseService.findById(merchandiseId);
         if (!merchandise) {
+            console.log('Merchandise not found');
             throw new NotFoundException('Sản phẩm không tồn tại');
         }
 
-        // Kiểm tra size và color có hợp lệ
-        if (!merchandise.size.includes(size)) {
-            throw new BadRequestException('Size không hợp lệ');
-        }
-        if (!merchandise.color.includes(color)) {
-            throw new BadRequestException('Màu sắc không hợp lệ');
-        }
 
-        // Kiểm tra số lượng tồn kho
-        if (merchandise.stock < quantity) {
-            throw new BadRequestException('Số lượng sản phẩm không đủ');
-        }
 
         // Tính tổng tiền
         const totalPrice = merchandise.price * quantity;
@@ -93,12 +85,18 @@ export class BookingService {
         }
 
         if (status === 'cancelled') {
-            // Hoàn trả số lượng tồn kho
-            await this.merchandiseService.updateStock(
-                booking.merchandise.toString(),
-                -booking.quantity
-            );
+            const merchId =
+                typeof booking.merchandise === 'string'
+                    ? booking.merchandise
+                    : booking.merchandise?._id?.toString(); // ✅ gọi hàm đầy đủ
+
+            if (!merchId) {
+                throw new InternalServerErrorException('Không tìm thấy ID sản phẩm để hoàn trả hàng');
+            }
+
+            await this.merchandiseService.updateStock(merchId, -booking.quantity);
         }
+
 
         booking.status = status;
         return booking.save();

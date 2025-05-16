@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcryptjs';
@@ -9,7 +9,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 export class UserService {
   constructor(
     @InjectModel(User.name) private userModel: Model<UserDocument>,
-  ) {}
+  ) { }
 
   async createUser(createUserDto: CreateUserDto): Promise<User> {
     const { email, password, fullName } = createUserDto;
@@ -32,6 +32,7 @@ export class UserService {
 
     return newUser.save();
   }
+
   async createAdmin(email: string, password: string) {
     const adminExists = await this.userModel.findOne({ email });
     if (adminExists) {
@@ -43,4 +44,34 @@ export class UserService {
     await admin.save();
     return { message: 'Admin created successfully' };
   }
+
+  async updateUserRole(userId: string, newRole: 'admin' | 'user') {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    user.role = newRole;
+    await user.save();
+
+    return {
+      message: `User role updated to ${newRole}`,
+      user: {
+        id: user._id,
+        email: user.email,
+        role: user.role
+      }
+    };
+  }
+  async findAllUsers(): Promise<User[]> {
+    return this.userModel.find().select('-password'); // ẩn password
+  }
+  async deleteUser(id: string): Promise<any> {
+    const user = await this.userModel.findByIdAndDelete(id);
+    if (!user) {
+      throw new NotFoundException('Người dùng không tồn tại');
+    }
+    return { message: 'Xóa thành công' };
+  }
+
 }
