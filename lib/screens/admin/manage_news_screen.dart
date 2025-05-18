@@ -14,6 +14,7 @@ class ManageNewsScreen extends StatefulWidget {
     this.isFilteringByCategory = false,
   }) : super(key: key);
 
+
   @override
   State<ManageNewsScreen> createState() => _ManageNewsScreenState();
 }

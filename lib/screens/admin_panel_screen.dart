@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/screens/admin/manage_products_screen.dart';
 import 'package:flutter_application_1/screens/admin/manage_users_screen.dart';
+import 'package:flutter_application_1/screens/admin/manage_bookings_screen.dart';
 import 'package:flutter_application_1/screens/admin/manage_news_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
@@ -95,8 +96,16 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                 Icons.shopping_cart_checkout,
                 Colors.green,
                 [
-                  AdminFeature("Danh sách đơn hàng", Icons.receipt_long, () {}),
-                  AdminFeature("Xác nhận đơn hàng", Icons.check_circle, () {}),
+                  AdminFeature(
+                    "Danh sách đơn hàng",
+                    Icons.receipt_long,
+                    () => _navigateToBookingManagement(),
+                  ),
+                  AdminFeature(
+                    "Xác nhận đơn hàng",
+                    Icons.check_circle,
+                    () => _navigateToBookingManagement(),
+                  ),
                 ],
               ),
 
@@ -105,24 +114,21 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               _buildManagementSection(
                 context,
                 "Quản lý tin tức",
-                Icons.add_circle,
-                Colors.orange,
+                Icons.abc_rounded,
+                Colors.green,
                 [
                   AdminFeature(
-                    "Thêm tin mới",
-                    Icons.add_circle,
-                        () => _navigateToNewsManagement(isCreating: true),
+                    "Danh sách tin tức",
+                    Icons.access_time,
+                        () => _navigateToNewManagement(),
                   ),
                   AdminFeature(
-                    "Danh sách tin",
-                    Icons.list,
-                        () => _navigateToNewsManagement(),
+                    "Tạo tin tức",
+                    Icons.add_a_photo,
+                        () => _navigateToNewManagement(
+                          isCreating: true
+                        ),
                   ),
-                  AdminFeature(
-                    "Tìm kiếm theo danh mục",
-                    Icons.category,
-                        () => _navigateToNewsManagement(isFilteringByCategory: true),
-                    ),
                 ],
               ),
             ],
@@ -234,22 +240,6 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
     );
   }
 
-  void _navigateToNewsManagement({
-    bool isCreating = false,
-    bool isFilteringByCategory = false,
-  }) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => ManageNewsScreen(
-          isCreating: isCreating,
-          isFilteringByCategory: isFilteringByCategory,
-        ),
-      ),
-    );
-  }
-
-
   void _navigateToProductManagement({
     bool isCreating = false,
     bool isFilteringByCategory = false,
@@ -263,6 +253,29 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               isFilteringByCategory: isFilteringByCategory,
             ),
       ),
+    );
+  }
+
+  void _navigateToNewManagement({
+    bool isCreating = false,
+    bool isFilteringByCategory = false,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ManageNewsScreen(
+          isCreating: isCreating,
+          isFilteringByCategory: isFilteringByCategory,
+        ),
+      ),
+    );
+  }
+
+  void _navigateToBookingManagement() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const ManageBookingsScreen()),
     );
   }
 }

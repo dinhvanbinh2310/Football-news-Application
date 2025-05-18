@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_application_1/screens/login_screen.dart';
 import 'package:flutter_application_1/screens/admin_panel_screen.dart';
+import 'package:flutter_application_1/screens/cart_screen.dart';
+import 'package:flutter_application_1/screens/transaction_history_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../screens/cart_list_screen.dart';
 
 class TopNavbar extends StatefulWidget implements PreferredSizeWidget {
   final String title;
@@ -137,17 +138,29 @@ class _TopNavbarState extends State<TopNavbar> {
             onPressed: () => _navigateToAdminPanel(context),
             tooltip: 'Quản trị hệ thống',
           ),
-        if (isLoggedIn)
+        if (isLoggedIn) ...[
+          IconButton(
+            icon: Icon(Icons.history),
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const TransactionHistoryScreen(),
+                ),
+              );
+            },
+            tooltip: 'Lịch sử giao dịch',
+          ),
           IconButton(
             icon: Icon(Icons.shopping_bag),
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => CartListScreen()),
+                MaterialPageRoute(builder: (context) => const CartScreen()),
               );
             },
-          )
-        else
+          ),
+        ] else
           TextButton(
             onPressed: () async {
               final result = await Navigator.push(

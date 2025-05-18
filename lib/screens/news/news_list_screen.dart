@@ -52,28 +52,29 @@ class NewsListScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Hiển thị ảnh bìa nếu có
-                          news.imageUrl != null
-                              ? ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: Image.network(
-                              news.imageUrl!,
-                              width: 100,
-                              height: 100,
-                              fit: BoxFit.cover,
-                            ),
-                          )
-                              : Container(
+                          SizedBox(
                             width: 100,
                             height: 100,
-                            color: Colors.grey[200],
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(8),
+                              child: Image.network(
+                                news.imageUrl!,
+                                fit: BoxFit.cover,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Container(
+                                    color: Colors.grey[300],
+                                    child: Icon(Icons.broken_image, size: 50, color: Colors.grey),
+                                  );
+                                },
+                              ),
+                            ),
                           ),
                           SizedBox(width: 10),
+                          // 2. Expanded để phần text chiếm phần còn lại
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                // Tiêu đề bài viết
                                 Text(
                                   news.title,
                                   style: TextStyle(
@@ -84,7 +85,6 @@ class NewsListScreen extends StatelessWidget {
                                   overflow: TextOverflow.ellipsis,
                                 ),
                                 SizedBox(height: 8),
-                                // Tóm tắt bài viết
                                 Text(
                                   news.description ?? 'No description available',
                                   style: TextStyle(

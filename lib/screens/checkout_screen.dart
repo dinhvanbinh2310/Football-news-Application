@@ -115,70 +115,72 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
   Widget _buildBankTransferInfo(double totalPrice) {
     return _paymentMethod == 'Chuyển khoản ngân hàng'
         ? Card(
-          margin: const EdgeInsets.only(bottom: 16),
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Thông tin chuyển khoản',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-                const SizedBox(height: 16),
+            margin: const EdgeInsets.only(bottom: 16),
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Thông tin chuyển khoản',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 16),
 
-                // QR Code (giả lập - trong ứng dụng thực tế bạn sẽ sử dụng thư viện tạo QR)
-                Center(
-                  child: Container(
-                    width: 200,
-                    height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[200],
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Image.network(
-                      'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${Uri.encodeComponent("${_bankInfo['bankName']} - ${_bankInfo['accountNumber']} - ${_bankInfo['accountName']} - ${totalPrice} USD")}',
-                      fit: BoxFit.cover,
-                      errorBuilder:
-                          (context, error, stackTrace) => const Icon(
-                            Icons.qr_code,
-                            size: 80,
-                            color: Colors.grey,
-                          ),
+                  // QR Code (giả lập - trong ứng dụng thực tế bạn sẽ sử dụng thư viện tạo QR)
+                  Center(
+                    child: Container(
+                      width: 200,
+                      height: 200,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[200],
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Image.network(
+                        'https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${Uri.encodeComponent("${_bankInfo['bankName']} - ${_bankInfo['accountNumber']} - ${_bankInfo['accountName']} - ${totalPrice} USD")}',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(
+                          Icons.qr_code,
+                          size: 80,
+                          color: Colors.grey,
+                        ),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
-                // Thông tin chuyển khoản
-                _buildBankInfoRow('Ngân hàng:', _bankInfo['bankName']!),
-                _buildBankInfoRow('Tên tài khoản:', _bankInfo['accountName']!),
-                _buildBankInfoRow('Số tài khoản:', _bankInfo['accountNumber']!),
-                _buildBankInfoRow('Chi nhánh:', _bankInfo['branch']!),
-                _buildBankInfoRow(
-                  'Số tiền:',
-                  '\$${totalPrice.toStringAsFixed(2)}',
-                ),
-                _buildBankInfoRow('Nội dung CK:', '${_bankInfo['content']}'),
-
-                const SizedBox(height: 8),
-                const Divider(),
-                const SizedBox(height: 8),
-
-                // Lưu ý
-                const Text(
-                  'Lưu ý: Vui lòng chuyển khoản đúng số tiền và nội dung để đơn hàng được xử lý nhanh chóng. Đơn hàng sẽ được xác nhận sau khi chúng tôi nhận được thanh toán.',
-                  style: TextStyle(
-                    fontSize: 13,
-                    fontStyle: FontStyle.italic,
-                    color: Colors.red,
+                  // Thông tin chuyển khoản
+                  _buildBankInfoRow('Ngân hàng:', _bankInfo['bankName']!),
+                  _buildBankInfoRow(
+                      'Tên tài khoản:', _bankInfo['accountName']!),
+                  _buildBankInfoRow(
+                      'Số tài khoản:', _bankInfo['accountNumber']!),
+                  _buildBankInfoRow('Chi nhánh:', _bankInfo['branch']!),
+                  _buildBankInfoRow(
+                    'Số tiền:',
+                    '\$${totalPrice.toStringAsFixed(2)}',
                   ),
-                  textAlign: TextAlign.justify,
-                ),
-              ],
+                  _buildBankInfoRow('Nội dung CK:', '${_bankInfo['content']}'),
+
+                  const SizedBox(height: 8),
+                  const Divider(),
+                  const SizedBox(height: 8),
+
+                  // Lưu ý
+                  const Text(
+                    'Lưu ý: Vui lòng chuyển khoản đúng số tiền và nội dung để đơn hàng được xử lý nhanh chóng. Đơn hàng sẽ được xác nhận sau khi chúng tôi nhận được thanh toán.',
+                    style: TextStyle(
+                      fontSize: 13,
+                      fontStyle: FontStyle.italic,
+                      color: Colors.red,
+                    ),
+                    textAlign: TextAlign.justify,
+                  ),
+                ],
+              ),
             ),
-          ),
-        )
+          )
         : const SizedBox.shrink();
   }
 
@@ -247,7 +249,8 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
           ),
         ),
       );
-      Navigator.popUntil(context, ModalRoute.withName('/'));
+      // Trả về true để thông báo thanh toán thành công
+      Navigator.pop(context, true);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Đặt hàng thất bại. Vui lòng thử lại!')),
@@ -268,250 +271,249 @@ class _CheckoutScreenState extends State<CheckoutScreen> {
         scaffoldKey: _scaffoldKey,
         onLoginSuccess: _onLoginSuccess,
       ),
-      body:
-          !isLoggedIn
+      body: !isLoggedIn
+          ? const Center(
+              child: Text(
+                'Vui lòng đăng nhập để tiếp tục thanh toán',
+                style: TextStyle(fontSize: 18),
+              ),
+            )
+          : (cartItems.isEmpty
               ? const Center(
-                child: Text(
-                  'Vui lòng đăng nhập để tiếp tục thanh toán',
-                  style: TextStyle(fontSize: 18),
-                ),
-              )
-              : (cartItems.isEmpty
-                  ? const Center(
-                    child: Text(
-                      'Giỏ hàng trống, không thể thanh toán',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  )
-                  : SingleChildScrollView(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Order Summary
-                          Card(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Thông tin đơn hàng',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
+                  child: Text(
+                    'Giỏ hàng trống, không thể thanh toán',
+                    style: TextStyle(fontSize: 18),
+                  ),
+                )
+              : SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Order Summary
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Thông tin đơn hàng',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
                                   ),
-                                  const SizedBox(height: 8),
-                                  Container(
-                                    height: 150,
-                                    child: ListView.builder(
-                                      itemCount: cartItems.length,
-                                      itemBuilder: (context, index) {
-                                        final item = cartItems[index];
-                                        return ListTile(
-                                          contentPadding: EdgeInsets.zero,
-                                          title: Text(item['name']),
-                                          subtitle: Text('\$${item['price']}'),
-                                          leading: Container(
-                                            width: 50,
-                                            height: 50,
-                                            decoration: BoxDecoration(
-                                              borderRadius:
-                                                  BorderRadius.circular(8),
-                                              color: Colors.grey[200],
-                                            ),
-                                            child: buildImageFromBase64(
-                                              item['image'],
-                                            ),
+                                ),
+                                const SizedBox(height: 8),
+                                Container(
+                                  height: 150,
+                                  child: ListView.builder(
+                                    itemCount: cartItems.length,
+                                    itemBuilder: (context, index) {
+                                      final item = cartItems[index];
+                                      return ListTile(
+                                        contentPadding: EdgeInsets.zero,
+                                        title: Text(item['name']),
+                                        subtitle: Text('\$${item['price']}'),
+                                        leading: Container(
+                                          width: 50,
+                                          height: 50,
+                                          decoration: BoxDecoration(
+                                            borderRadius:
+                                                BorderRadius.circular(8),
+                                            color: Colors.grey[200],
                                           ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                                  const Divider(),
-                                  Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      const Text(
-                                        'Tổng cộng:',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
+                                          child: buildImageFromBase64(
+                                            item['image'],
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        '\$${totalPrice.toStringAsFixed(2)}',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.blue,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Customer Information
-                          Card(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Thông tin giao hàng',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  TextFormField(
-                                    controller: _nameController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Họ tên',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Vui lòng nhập họ tên';
-                                      }
-                                      return null;
+                                      );
                                     },
                                   ),
-                                  const SizedBox(height: 16),
-                                  TextFormField(
-                                    controller: _addressController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Địa chỉ',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Vui lòng nhập địa chỉ';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  TextFormField(
-                                    controller: _phoneController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Số điện thoại',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    keyboardType: TextInputType.phone,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Vui lòng nhập số điện thoại';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                  const SizedBox(height: 16),
-                                  TextFormField(
-                                    controller: _emailController,
-                                    decoration: const InputDecoration(
-                                      labelText: 'Email',
-                                      border: OutlineInputBorder(),
-                                    ),
-                                    keyboardType: TextInputType.emailAddress,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Vui lòng nhập email';
-                                      }
-                                      return null;
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Payment Method
-                          Card(
-                            margin: const EdgeInsets.only(bottom: 16),
-                            child: Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  const Text(
-                                    'Phương thức thanh toán',
-                                    style: TextStyle(
-                                      fontSize: 18,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  RadioListTile<String>(
-                                    title: const Text(
-                                      'Thanh toán khi nhận hàng',
-                                    ),
-                                    value: 'Thanh toán khi nhận hàng',
-                                    groupValue: _paymentMethod,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _paymentMethod = value!;
-                                      });
-                                    },
-                                  ),
-                                  RadioListTile<String>(
-                                    title: const Text('Chuyển khoản ngân hàng'),
-                                    value: 'Chuyển khoản ngân hàng',
-                                    groupValue: _paymentMethod,
-                                    onChanged: (value) {
-                                      setState(() {
-                                        _paymentMethod = value!;
-                                      });
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          // Bank Transfer Information (hiển thị khi chọn chuyển khoản)
-                          _buildBankTransferInfo(totalPrice),
-
-                          // Complete Order Button
-                          SizedBox(
-                            width: double.infinity,
-                            child: ElevatedButton(
-                              onPressed: () async {
-                                if (_formKey.currentState!.validate()) {
-                                  await _submitOrder(cartItems);
-                                }
-                              },
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 16,
                                 ),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
+                                const Divider(),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    const Text(
+                                      'Tổng cộng:',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    Text(
+                                      '\$${totalPrice.toStringAsFixed(2)}',
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.blue,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ),
-                              child: const Text(
-                                'Hoàn tất đặt hàng',
-                                style: TextStyle(fontSize: 16),
-                              ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+
+                        // Customer Information
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Thông tin giao hàng',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _nameController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Họ tên',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập họ tên';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _addressController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Địa chỉ',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập địa chỉ';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _phoneController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Số điện thoại',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.phone,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập số điện thoại';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                                const SizedBox(height: 16),
+                                TextFormField(
+                                  controller: _emailController,
+                                  decoration: const InputDecoration(
+                                    labelText: 'Email',
+                                    border: OutlineInputBorder(),
+                                  ),
+                                  keyboardType: TextInputType.emailAddress,
+                                  validator: (value) {
+                                    if (value == null || value.isEmpty) {
+                                      return 'Vui lòng nhập email';
+                                    }
+                                    return null;
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Payment Method
+                        Card(
+                          margin: const EdgeInsets.only(bottom: 16),
+                          child: Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  'Phương thức thanh toán',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 16),
+                                RadioListTile<String>(
+                                  title: const Text(
+                                    'Thanh toán khi nhận hàng',
+                                  ),
+                                  value: 'Thanh toán khi nhận hàng',
+                                  groupValue: _paymentMethod,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _paymentMethod = value!;
+                                    });
+                                  },
+                                ),
+                                RadioListTile<String>(
+                                  title: const Text('Chuyển khoản ngân hàng'),
+                                  value: 'Chuyển khoản ngân hàng',
+                                  groupValue: _paymentMethod,
+                                  onChanged: (value) {
+                                    setState(() {
+                                      _paymentMethod = value!;
+                                    });
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+
+                        // Bank Transfer Information (hiển thị khi chọn chuyển khoản)
+                        _buildBankTransferInfo(totalPrice),
+
+                        // Complete Order Button
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton(
+                            onPressed: () async {
+                              if (_formKey.currentState!.validate()) {
+                                await _submitOrder(cartItems);
+                              }
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 16,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: const Text(
+                              'Hoàn tất đặt hàng',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                  )),
+                  ),
+                )),
     );
   }
 }
