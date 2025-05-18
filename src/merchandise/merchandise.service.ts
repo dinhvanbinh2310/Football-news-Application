@@ -19,7 +19,7 @@ export class MerchandiseService {
         return this.merchandiseModel.find().exec();
     }
 
-    async findById(id: string): Promise<Merchandise> {
+    async findById(id: string): Promise<MerchandiseDocument> {
         const merchandise = await this.merchandiseModel.findById(id).exec();
         if (!merchandise) {
             throw new NotFoundException(`Merchandise with ID ${id} not found`);

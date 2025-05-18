@@ -11,6 +11,8 @@ import { OrderModule } from './order/order.module';
 import { ChatModule } from './chat/chat.module';
 import { MerchandiseModule } from './merchandise/merchandise.module';
 import { BookingModule } from './booking/booking.module';
+import { NewsModule } from './news/news.module';
+
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { BookingModule } from './booking/booking.module';
     ChatModule,
     MerchandiseModule,
     BookingModule,
+    NewsModule,
   ],
   providers: [AppService],
   controllers: [AppController],
