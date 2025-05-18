@@ -47,7 +47,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('http://localhost:3000/user'),
+        Uri.parse('http://10.0.2.2:3000/user'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -109,7 +109,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
       }
 
       final response = await http.put(
-        Uri.parse('http://localhost:3000/user/$userId/role'),
+        Uri.parse('http://10.0.2.2:3000/user/$userId/role'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
@@ -169,7 +169,7 @@ class _ManageUsersScreenState extends State<ManageUsersScreen> {
       }
 
       final response = await http.delete(
-        Uri.parse('http://localhost:3000/user/$userId'),
+        Uri.parse('http://10.0.2.2:3000/user/$userId'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

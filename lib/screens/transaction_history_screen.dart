@@ -44,7 +44,7 @@ class _TransactionHistoryScreenState extends State<TransactionHistoryScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('http://localhost:3000/bookings/my-bookings'),
+        Uri.parse('http://10.0.2.2:3000/bookings/my-bookings'),
         headers: {
           'Authorization': 'Bearer $_token',
           'Content-Type': 'application/json',

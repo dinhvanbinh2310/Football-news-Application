@@ -41,7 +41,7 @@ class _ManageBookingsScreenState extends State<ManageBookingsScreen> {
       }
 
       final response = await http.get(
-        Uri.parse('http://localhost:3000/bookings'),
+        Uri.parse('http://10.0.2.2:3000/bookings'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

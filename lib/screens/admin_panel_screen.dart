@@ -3,6 +3,7 @@ import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/screens/admin/manage_products_screen.dart';
 import 'package:flutter_application_1/screens/admin/manage_users_screen.dart';
 import 'package:flutter_application_1/screens/admin/manage_bookings_screen.dart';
+import 'package:flutter_application_1/screens/admin/manage_news_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class AdminPanelScreen extends StatefulWidget {
@@ -104,6 +105,29 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
                     "Xác nhận đơn hàng",
                     Icons.check_circle,
                     () => _navigateToBookingManagement(),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              _buildManagementSection(
+                context,
+                "Quản lý tin tức",
+                Icons.abc_rounded,
+                Colors.green,
+                [
+                  AdminFeature(
+                    "Danh sách tin tức",
+                    Icons.access_time,
+                        () => _navigateToNewManagement(),
+                  ),
+                  AdminFeature(
+                    "Tạo tin tức",
+                    Icons.add_a_photo,
+                        () => _navigateToNewManagement(
+                          isCreating: true
+                        ),
                   ),
                 ],
               ),
@@ -228,6 +252,22 @@ class _AdminPanelScreenState extends State<AdminPanelScreen> {
               isCreating: isCreating,
               isFilteringByCategory: isFilteringByCategory,
             ),
+      ),
+    );
+  }
+
+  void _navigateToNewManagement({
+    bool isCreating = false,
+    bool isFilteringByCategory = false,
+  }) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder:
+            (context) => ManageNewsScreen(
+          isCreating: isCreating,
+          isFilteringByCategory: isFilteringByCategory,
+        ),
       ),
     );
   }

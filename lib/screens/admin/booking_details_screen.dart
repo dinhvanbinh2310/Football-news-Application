@@ -46,7 +46,7 @@ class _BookingDetailsScreenState extends State<BookingDetailsScreen> {
 
       final response = await http.put(
         Uri.parse(
-            'http://localhost:3000/bookings/${widget.booking['_id']}/status'),
+            'http://10.0.2.2:3000/bookings/${widget.booking['_id']}/status'),
         headers: {
           'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',

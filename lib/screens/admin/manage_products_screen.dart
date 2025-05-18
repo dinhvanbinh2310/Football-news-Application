@@ -90,7 +90,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
         return;
       }
 
-      final url = Uri.parse('http://localhost:3000/merchandise');
+      final url = Uri.parse('http://10.0.2.2:3000/merchandise');
       final response = await http.get(
         url,
         headers: {
@@ -761,7 +761,7 @@ class _ManageProductsScreenState extends State<ManageProductsScreen> {
       return;
     }
 
-    final url = Uri.parse('http://localhost:3000/merchandise');
+    final url = Uri.parse('http://10.0.2.2:3000/merchandise');
     final response = await http.post(
       url,
       headers: {

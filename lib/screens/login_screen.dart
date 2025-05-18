@@ -3,6 +3,7 @@ import 'package:flutter_application_1/screens/forgot_password_screen.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter_application_1/services/auth_service.dart';
 import 'package:flutter_application_1/screens/register_screen.dart';
+import 'package:flutter_application_1/screens/home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -27,7 +28,10 @@ class _LoginScreenState extends State<LoginScreen> {
         // Không cần lưu token ở đây vì đã được xử lý trong ApiService.login
 
         // Return true to indicate successful login
-        Navigator.pop(context, true);
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => HomeScreen()),
+        );
       } else {
         ScaffoldMessenger.of(
           context,

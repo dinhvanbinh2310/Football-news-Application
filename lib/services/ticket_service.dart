@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:flutter_application_1/models/ticket_model.dart';
 
 class TicketService {
-  static const String apiUrl = 'http://localhost:3000/tickets';
+  static const String apiUrl = 'http://10.0.2.2:3000/tickets';
 
   static Future<List<Ticket>> fetchTickets() async {
     try {

@@ -4,7 +4,7 @@ import 'package:flutter_application_1/components/top_navbar.dart';
 import 'package:flutter_application_1/components/news_widget.dart';
 import 'package:flutter_application_1/components/arrival_widget.dart';
 import 'package:flutter_application_1/components/dashboard_drawer.dart';
-import 'package:flutter_application_1/screens/login_screen.dart';
+import 'package:flutter_application_1/screens/news/news_list_screen.dart';
 import 'package:flutter_application_1/screens/product_category_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -304,7 +304,15 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       TextButton(
-                        onPressed: () {},
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder:
+                                  (context) => NewsListScreen(),
+                            ),
+                          );
+                        },
                         child: Text(
                           'Xem tất cả',
                           style: GoogleFonts.poppins(

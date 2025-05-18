@@ -12,6 +12,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   google_fonts: ^6.1.0
   http: ^1.1.0
+  intl: ^0.18.1
   shared_preferences: ^2.0.18
   provider: ^6.1.1
   carousel_slider: ^4.2.1
